@@ -18,13 +18,21 @@ public class UserGraphProcessor {
     private final UserGraph userGraph;
     // TODO use CDI
     private final ObjectMapper mapper;
+    private final boolean surpassLog;
     private static final String UPDATE_TYPE = "update";
     private static final String MAKE_FRIEND_TYPE = "make_friends";
     private static final String DELETE_FRIEND_TYPE = "del_friends";
 
+    public UserGraphProcessor(boolean surpassLog) {
+        this.userGraph = new UserGraph();
+        this.mapper = new ObjectMapper();
+        this.surpassLog = surpassLog;
+    }
+
     public UserGraphProcessor() {
         this.userGraph = new UserGraph();
         this.mapper = new ObjectMapper();
+        this.surpassLog = false;
     }
 
     /**
@@ -103,12 +111,12 @@ public class UserGraphProcessor {
     public String read(String filename) throws RuntimeException {
         try {
             File myObj = new File(filename);
-            Scanner myReader = new Scanner(myObj);
+            Scanner fileReader = new Scanner(myObj);
             StringBuilder outputBuilder = new StringBuilder();
 
-            while (myReader.hasNextLine()) {
-                String data = myReader.nextLine();
-                JsonNode action = mapper.readValue(data, ObjectNode.class);
+            while (fileReader.hasNextLine()) {
+                String line = fileReader.nextLine();
+                JsonNode action = mapper.readValue(line, ObjectNode.class);
 
                 Object actionOutput = processAction(action);
                 if (actionOutput != null) {
@@ -116,10 +124,12 @@ public class UserGraphProcessor {
                     outputBuilder.append(System.getProperty("line.separator"));
                 }
             }
-            myReader.close();
+            fileReader.close();
 
             String output = outputBuilder.toString();
-            System.out.print(output);
+            if (!surpassLog) {
+                System.out.print(output);
+            }
 
             return output;
         } catch (FileNotFoundException | JsonProcessingException | IllegalArgumentException e) {
