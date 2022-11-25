@@ -11,7 +11,9 @@ import java.util.Objects;
 import java.util.Scanner;
 
 /**
- * User graph processor
+ * User graph processor broadcasts updates in user states to friends
+ *
+ * This is a solution class to question 1
  */
 public class UserGraphProcessor {
 
@@ -133,7 +135,8 @@ public class UserGraphProcessor {
 
             return output;
         } catch (FileNotFoundException | JsonProcessingException | IllegalArgumentException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return null;
         }
     }
 }

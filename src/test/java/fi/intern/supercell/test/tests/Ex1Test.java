@@ -1,7 +1,6 @@
 package fi.intern.supercell.test.tests;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.intern.supercell.UserGraphProcessor;
 import org.junit.jupiter.api.Assertions;
@@ -33,11 +32,8 @@ class Ex1Test {
      *
      * @param inputFilename input filename
      * @param outputFilename output filename
-     * @throws JsonMappingException JsonMappingException
-     * @throws RuntimeException RuntimeException
-     * @throws FileNotFoundException FileNotFoundException
      */
-    void testProcessor(String inputFilename, String outputFilename) throws FileNotFoundException, RuntimeException, JsonProcessingException {
+    void testProcessor(String inputFilename, String outputFilename) {
         try {
             Path inputPath = Paths.get(dirPrefix, inputFilename);
             File outputFile = new File(dirPrefix, outputFilename);
@@ -57,37 +53,26 @@ class Ex1Test {
             fileReader.close();
 
         } catch (FileNotFoundException | RuntimeException | JsonProcessingException e) {
-            throw e;
+            e.printStackTrace();
+            Assertions.fail();
         }
     }
 
     @Test
     @DisplayName("test input1")
-    void testInput1() throws FileNotFoundException, RuntimeException, JsonProcessingException {
-        try {
-            testProcessor("input1.txt", "output1.txt");
-        } catch (FileNotFoundException | RuntimeException | JsonProcessingException e) {
-            throw e;
-        }
+    void testInput1() {
+        testProcessor("input1.txt", "output1.txt");
     }
 
     @Test
     @DisplayName("test input2")
-    void testInput2() throws FileNotFoundException, RuntimeException, JsonProcessingException {
-        try {
-            testProcessor("input2.txt", "output2.txt");
-        } catch (FileNotFoundException | RuntimeException | JsonProcessingException e) {
-            throw e;
-        }
+    void testInput2() {
+        testProcessor("input2.txt", "output2.txt");
     }
 
     @Test
     @DisplayName("test input3")
-    void testInput3() throws FileNotFoundException, RuntimeException, JsonProcessingException {
-        try {
-            testProcessor("input3.txt", "output3.txt");
-        } catch (FileNotFoundException | RuntimeException | JsonProcessingException e) {
-            throw e;
-        }
+    void testInput3() {
+        testProcessor("input3.txt", "output3.txt");
     }
 }

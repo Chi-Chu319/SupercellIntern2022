@@ -7,10 +7,10 @@ import java.util.LinkedList;
 import java.util.Map;
 
 /**
- * Class for user node representation
+ * Class for user node representation, handles user values, adj table
  */
 public class UserNode {
-    public String name;
+    private final String name;
     private final LinkedList<String> adj;
     private final Map<String, Pair<String, Integer>> values;
 
@@ -24,7 +24,25 @@ public class UserNode {
     }
 
     /**
-     * adds a friend
+     * Name getter
+     *
+     * @return username
+     */
+    public String getName () {
+        return this.name;
+    }
+
+    /**
+     * Name getter
+     *
+     * @return username
+     */
+    public Map<String, Pair<String, Integer>> getValues () {
+        return this.values;
+    }
+
+    /**
+     * Adds a friend
      *
      * @param friend friend
      */
@@ -51,7 +69,7 @@ public class UserNode {
     }
 
     /**
-     * Updates value
+     * Updates value if the timestamp is outdated
      *
      * @param timeStamp time stamp
      * @param key key

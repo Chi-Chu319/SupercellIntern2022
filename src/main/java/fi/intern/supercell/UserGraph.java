@@ -4,11 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 
 /**
- * Class for user node representation
+ * Class for user graph representation, handles connections between users
  */
 public class UserGraph {
     private int userLength;
@@ -57,8 +58,8 @@ public class UserGraph {
 
         logObj.put("user", user);
         logObj.put("timestamp", timestamp);
-        logObj.put("broadcast", friendsArray);
-        logObj.put("values", values);
+        logObj.set("broadcast", friendsArray);
+        logObj.set("values", values);
         return logObj;
     }
 
@@ -123,5 +124,29 @@ public class UserGraph {
         return hasFriends && !loggedValues.isEmpty() ?
                 constructLogObj(user, timestamp, friends, loggedValues) :
                 null;
+    }
+
+    /**
+     * Gets all users' state in one json
+     *
+     * @return user states
+     */
+    public JsonNode getUserStates () {
+        // TODO fix this by evaluating the double map solution
+        ObjectNode loggedValues = this.mapper.createObjectNode();
+
+        for (UserNode userNode : users) {
+            Map<String, Pair<String, Integer>> userValues = userNode.getValues();
+            ObjectNode jsonValues = this.mapper.convertValue(userValues, ObjectNode.class);
+
+            for (Iterator<Map.Entry<String, JsonNode>> it = jsonValues.fields(); it.hasNext(); ) {
+                Map.Entry<String, JsonNode> node = it.next();
+                jsonValues.put(node.getKey(), userValues.get(node.getKey()).getLeft());
+            }
+
+            loggedValues.set(userNode.getName(), jsonValues);
+        }
+
+        return loggedValues;
     }
 }
