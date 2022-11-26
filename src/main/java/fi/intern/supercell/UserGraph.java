@@ -12,35 +12,38 @@ import java.util.*;
  * Class for user graph representation, handles connections between users
  */
 public class UserGraph {
-    private int userLength;
-    private final ArrayList<UserNode> users;
-    private final Map<String, Integer> userSymbolTable;
-    private final ObjectMapper mapper;
+    private int userLength = 0;
+    private final ArrayList<UserNode> users = new ArrayList<>();
+    private final Map<String, Integer> userSymbolTable = new HashMap<>();
+    private final ObjectMapper mapper = new ObjectMapper();
+    private final static Object mutex = new Object();
 
     /**
      * Constructor for user graph
      */
     UserGraph() {
-        this.userLength = 0;
-        this.users = new ArrayList<>();
-        this.userSymbolTable = new HashMap<>();
-        this.mapper = new ObjectMapper();
     }
+
+    volatile static int userIndex;
 
     /**
      * Gets user index, create user if not exists
      *
      * @param user username
      */
-    private int getUserIndex (String user) {
-        if (userSymbolTable.get(user) != null) {
-            return userSymbolTable.get(user);
+    private synchronized int getUserIndex (String user) {
+        if (userSymbolTable.get(user) == null) {
+//            synchronized (mutex) {
+//                if (userSymbolTable.get(user) == null) {
+                this.users.add(new UserNode(user));
+                userSymbolTable.put(user, userLength);
+
+                return userLength++;
+//        }
+//    }
         }
 
-        userSymbolTable.put(user, userLength);
-        this.users.add(new UserNode(user));
-
-        return userLength++;
+        return userSymbolTable.get(user);
     }
 
     /**

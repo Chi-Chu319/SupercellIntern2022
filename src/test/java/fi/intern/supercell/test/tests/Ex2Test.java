@@ -7,44 +7,80 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.stream.Stream;
+import java.util.List;
 
 class Ex2Test {
 
-    UserGraphStateProcessor userGraphStateProcessor;
-    ObjectMapper mapper;
-    String dirPrefix;
+    UserGraphStateProcessor userGraphStateProcessor = new UserGraphStateProcessor(true);
+    ObjectMapper mapper = new ObjectMapper();
+    String dirPrefix = "src/test/java/resources/ex2";
 
     @BeforeEach
     void setUp() {
-        this.userGraphStateProcessor = new UserGraphStateProcessor(true);
-        this.mapper = new ObjectMapper();
-        this.dirPrefix = "src/test/java/resources/ex2";
+        this.userGraphStateProcessor.reset();
     }
 
     /**
-     * Tests the graph processor
+     * Tests the graph sequential processor
      *
      * @param inputFilename input filename
      * @param outputFilename output filename
      */
     void testSequentialProcessor(String inputFilename, String outputFilename) {
+        StringBuilder outputContentBuilder = new StringBuilder();
 
-        Path inputPath = Paths.get(dirPrefix, inputFilename);
-        Path outputPath = Paths.get(dirPrefix, outputFilename);
+        try {
+            File inputFile = new File(dirPrefix, inputFilename);
+            File outputFile = new File(dirPrefix, outputFilename);
 
-        String processorOutput = userGraphStateProcessor.readSequential(inputPath.toString());
+            List<String> inputLines = Files.readAllLines(inputFile.toPath());
+            List<String> outputLines = Files.readAllLines(outputFile.toPath());
 
-        StringBuilder contentBuilder = new StringBuilder();
-        try (Stream<String> lines = Files.lines(outputPath, StandardCharsets.UTF_8)){
-            lines.forEach(s -> contentBuilder.append(s).append("\n"));
+            long sequentialStart = System.currentTimeMillis();
+            String processorOutput = userGraphStateProcessor.processSequential(inputLines);
+            long sequentialFinish = System.currentTimeMillis();
 
-            String outputContent = contentBuilder.toString();
+            long sequentialTime = sequentialFinish - sequentialStart;
+            System.out.printf("Sequential time %d%n", sequentialTime);
+
+            outputLines.forEach(s -> outputContentBuilder.append(s).append("\n"));
+            String outputContent = outputContentBuilder.toString();
+
+            Assertions.assertEquals(mapper.readTree(processorOutput), mapper.readTree(outputContent));
+        } catch (RuntimeException | IOException e) {
+            e.printStackTrace();
+            Assertions.fail();
+        }
+    }
+
+    /**
+     * Tests the graph concurrent processor
+     *
+     * @param inputFilename input filename
+     * @param outputFilename output filename
+     */
+    void testConcurrentProcessor(String inputFilename, String outputFilename) {
+        StringBuilder outputContentBuilder = new StringBuilder();
+
+        try {
+            File inputFile = new File(dirPrefix, inputFilename);
+            File outputFile = new File(dirPrefix, outputFilename);
+
+            List<String> inputLines = Files.readAllLines(inputFile.toPath());
+            List<String> outputLines = Files.readAllLines(outputFile.toPath());
+
+            long concurrentStart = System.currentTimeMillis();
+            String processorOutput = userGraphStateProcessor.processConcurrent(inputLines);
+            long concurrentFinish = System.currentTimeMillis();
+
+            long sequentialTime = concurrentFinish - concurrentStart;
+            System.out.printf("Concurrent time %d%n", sequentialTime);
+
+            outputLines.forEach(s -> outputContentBuilder.append(s).append("\n"));
+            String outputContent = outputContentBuilder.toString();
 
             Assertions.assertEquals(mapper.readTree(processorOutput), mapper.readTree(outputContent));
         } catch (RuntimeException | IOException e) {
@@ -54,8 +90,15 @@ class Ex2Test {
     }
 
     @Test
-    @DisplayName("test input1")
-    void testInput1() {
+    @DisplayName("test input1 sequential")
+    void testInput1Sequential() {
         testSequentialProcessor("input1.txt", "output1.txt");
+    }
+
+//    TODO check for failure
+    @Test
+    @DisplayName("test input1 concurrent")
+    void testInput1Concurrent() {
+        testConcurrentProcessor("input1.txt", "output1.txt");
     }
 }

@@ -77,14 +77,16 @@ public class UserNode {
      * @return true if updated, false if not updated
      */
     public boolean updateValue (int timeStamp, String key, String value) {
-        Pair<String, Integer> currentValue = values.get(key);
+        synchronized (this) {
+            Pair<String, Integer> currentValue = values.get(key);
 
-        // if value not exists or value is outdated, updated
-        if (currentValue == null || currentValue.getRight() < timeStamp) {
-            values.put(key, Pair.of(value, timeStamp));
-            return true;
+            // if value not exists or value is outdated, updated
+            if (currentValue == null || currentValue.getRight() < timeStamp) {
+                values.put(key, Pair.of(value, timeStamp));
+                return true;
+            }
+
+            return false;
         }
-
-        return false;
     }
 }

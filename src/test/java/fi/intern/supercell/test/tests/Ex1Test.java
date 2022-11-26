@@ -1,6 +1,5 @@
 package fi.intern.supercell.test.tests;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.intern.supercell.UserGraphProcessor;
 import org.junit.jupiter.api.Assertions;
@@ -9,22 +8,19 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Scanner;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
 
 class Ex1Test {
 
-    UserGraphProcessor userGraphProcessor;
-    ObjectMapper mapper;
-    String dirPrefix;
+    private final UserGraphProcessor userGraphProcessor = new UserGraphProcessor(true);
+    private final ObjectMapper mapper = new ObjectMapper();
+    private final String dirPrefix = "src/test/java/resources/ex1";
 
     @BeforeEach
     void setUp() {
-        this.userGraphProcessor = new UserGraphProcessor(true);
-        this.mapper = new ObjectMapper();
-        this.dirPrefix = "src/test/java/resources/ex1";
+        this.userGraphProcessor.reset();
     }
 
     /**
@@ -35,24 +31,23 @@ class Ex1Test {
      */
     void testProcessor(String inputFilename, String outputFilename) {
         try {
-            Path inputPath = Paths.get(dirPrefix, inputFilename);
+            File inputFile = new File(dirPrefix, inputFilename);
             File outputFile = new File(dirPrefix, outputFilename);
 
-            String processorOutput = userGraphProcessor.read(inputPath.toString());
+            List<String> inputLines = Files.readAllLines(inputFile.toPath());
+            List<String> outputLines = Files.readAllLines(outputFile.toPath());
+
+            String processorOutput = userGraphProcessor.process(inputLines);
             String[] processorOutputLines = processorOutput.split(System.lineSeparator());
-            Scanner fileReader = new Scanner(outputFile);
 
             int lineIndex = 0;
-            while (fileReader.hasNextLine()) {
-                String line = fileReader.nextLine();
+            for (String outputLine: outputLines) {
                 String processedLine = processorOutputLines[lineIndex];
 
-                Assertions.assertEquals(mapper.readTree(line), mapper.readTree(processedLine));
+                Assertions.assertEquals(mapper.readTree(outputLine), mapper.readTree(processedLine));
                 lineIndex++;
             }
-            fileReader.close();
-
-        } catch (FileNotFoundException | RuntimeException | JsonProcessingException e) {
+        } catch (RuntimeException | IOException e) {
             e.printStackTrace();
             Assertions.fail();
         }

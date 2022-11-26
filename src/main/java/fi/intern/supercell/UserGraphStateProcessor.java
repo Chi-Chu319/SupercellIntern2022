@@ -6,9 +6,21 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Stream;
 
 /**
  * User graph processor track users states
@@ -17,21 +29,22 @@ import java.util.Scanner;
  */
 public class UserGraphStateProcessor {
 
-    private final UserGraph userGraph;
+    private UserGraph userGraph = new UserGraph();
     // TODO use CDI
-    private final ObjectMapper mapper;
-    private final boolean surpassLog;
+    private final ObjectMapper mapper = new ObjectMapper();
+    private boolean surpassLog = false;
+    private int parallelism;
+    private ForkJoinPool forkJoinPool;
 
     public UserGraphStateProcessor(boolean surpassLog) {
-        this.userGraph = new UserGraph();
-        this.mapper = new ObjectMapper();
         this.surpassLog = surpassLog;
+        this.parallelism = Runtime.getRuntime().availableProcessors();
+        this.forkJoinPool = new ForkJoinPool(this.parallelism);
     }
 
     public UserGraphStateProcessor() {
-        this.userGraph = new UserGraph();
-        this.mapper = new ObjectMapper();
-        this.surpassLog = false;
+        this.parallelism = Runtime.getRuntime().availableProcessors();
+        this.forkJoinPool = new ForkJoinPool(this.parallelism);
     }
 
     /**
@@ -53,24 +66,36 @@ public class UserGraphStateProcessor {
     }
 
     /**
-     * Reads from input, stdout/outputs entire user state in a map (sequential)
-     *
-     * @param filename filename
-     * @return output string
-     * @throws RuntimeException throws RuntimeException
+     * Gets parallelism
      */
-    public String readSequential(String filename) throws RuntimeException {
+    public int getParallelism () {
+        return this.parallelism;
+    }
+
+    /**
+     * Gets parallelism
+     */
+    public void setParallelism (int parallelism) {
+        this.parallelism = parallelism;
+        this.forkJoinPool = new ForkJoinPool(this.parallelism);
+    }
+
+    /**
+     * Processes the input, stdout/outputs entire user state in a map (sequential)
+     *
+     * @param lines lines
+     * @return output string
+     */
+    public String processSequential(List<String> lines) {
         try {
-            File myObj = new File(filename);
-            Scanner fileReader = new Scanner(myObj);
-
-            while (fileReader.hasNextLine()) {
-                String line = fileReader.nextLine();
-                JsonNode action = mapper.readValue(line, ObjectNode.class);
-
-                processUpdateAction(action);
-            }
-            fileReader.close();
+            lines.forEach(line -> {
+                try {
+                    JsonNode action = mapper.readValue(line, ObjectNode.class);
+                    processUpdateAction(action);
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+            });
 
             String output = userGraph.getUserStates().toString();
             if (!surpassLog) {
@@ -78,7 +103,45 @@ public class UserGraphStateProcessor {
             }
 
             return output;
-        } catch (FileNotFoundException | JsonProcessingException | IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Resets the graph states
+     */
+    public void reset () {
+        this.userGraph = new UserGraph();
+    }
+
+    /**
+     * Processes the input, stdout/outputs entire user state in a map (concurrent)
+     *
+     * @param lines lines
+     * @return output string
+     */
+    public String processConcurrent(List<String> lines) {
+        try {
+            forkJoinPool.submit(() ->
+                lines.parallelStream().forEach(line -> {
+                    try {
+                        JsonNode action = mapper.readValue(line, ObjectNode.class);
+                        processUpdateAction(action);
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+                })
+            ).get();
+
+            String output = userGraph.getUserStates().toString();
+            if (!surpassLog) {
+                System.out.print(output);
+            }
+
+            return output;
+        } catch (IllegalArgumentException | ExecutionException | InterruptedException e) {
             e.printStackTrace();
             return null;
         }

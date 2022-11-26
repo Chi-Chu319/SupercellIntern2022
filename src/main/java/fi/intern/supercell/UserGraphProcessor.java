@@ -5,10 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.util.List;
 import java.util.Objects;
-import java.util.Scanner;
 
 /**
  * User graph processor broadcasts updates in user states to friends
@@ -17,23 +15,19 @@ import java.util.Scanner;
  */
 public class UserGraphProcessor {
 
-    private final UserGraph userGraph;
+    private UserGraph userGraph = new UserGraph();
     // TODO use CDI
-    private final ObjectMapper mapper;
+    private final ObjectMapper mapper = new ObjectMapper();
     private final boolean surpassLog;
     private static final String UPDATE_TYPE = "update";
     private static final String MAKE_FRIEND_TYPE = "make_friends";
     private static final String DELETE_FRIEND_TYPE = "del_friends";
 
     public UserGraphProcessor(boolean surpassLog) {
-        this.userGraph = new UserGraph();
-        this.mapper = new ObjectMapper();
         this.surpassLog = surpassLog;
     }
 
     public UserGraphProcessor() {
-        this.userGraph = new UserGraph();
-        this.mapper = new ObjectMapper();
         this.surpassLog = false;
     }
 
@@ -104,29 +98,31 @@ public class UserGraphProcessor {
     }
 
     /**
-     * Reads from input, output the log in stdout and return it
-     *
-     * @param filename filename
-     * @return output string
-     * @throws RuntimeException throws RuntimeException
+     * Resets the graph states
      */
-    public String read(String filename) throws RuntimeException {
+    public void reset () {
+        this.userGraph = new UserGraph();
+    }
+
+    /**
+     * process the input, output the log in stdout and return it
+     *
+     * @param lines lines
+     * @return output string
+     */
+    public String process(List<String> lines) {
         try {
-            File myObj = new File(filename);
-            Scanner fileReader = new Scanner(myObj);
             StringBuilder outputBuilder = new StringBuilder();
 
-            while (fileReader.hasNextLine()) {
-                String line = fileReader.nextLine();
+            for (String line: lines) {
                 JsonNode action = mapper.readValue(line, ObjectNode.class);
-
                 Object actionOutput = processAction(action);
+
                 if (actionOutput != null) {
                     outputBuilder.append(actionOutput);
                     outputBuilder.append(System.getProperty("line.separator"));
                 }
             }
-            fileReader.close();
 
             String output = outputBuilder.toString();
             if (!surpassLog) {
@@ -134,7 +130,7 @@ public class UserGraphProcessor {
             }
 
             return output;
-        } catch (FileNotFoundException | JsonProcessingException | IllegalArgumentException e) {
+        } catch (JsonProcessingException | IllegalArgumentException e) {
             e.printStackTrace();
             return null;
         }
