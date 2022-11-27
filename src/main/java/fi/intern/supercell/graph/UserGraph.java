@@ -1,4 +1,4 @@
-package fi.intern.supercell;
+package fi.intern.supercell.graph;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,17 +11,16 @@ import java.util.*;
 /**
  * Class for user graph representation, handles connections between users
  */
-public class UserGraph {
+public class UserGraph extends AbstractUserGraph {
     private int userLength = 0;
     private final ArrayList<UserNode> users = new ArrayList<>();
     private final Map<String, Integer> userSymbolTable = new HashMap<>();
     private final ObjectMapper mapper = new ObjectMapper();
-    private final static Object mutex = new Object();
 
     /**
      * Constructor for user graph
      */
-    UserGraph() {
+    public UserGraph() {
     }
 
     volatile static int userIndex;
@@ -31,16 +30,12 @@ public class UserGraph {
      *
      * @param user username
      */
-    private synchronized int getUserIndex (String user) {
+    private int getUserIndex (String user) {
         if (userSymbolTable.get(user) == null) {
-//            synchronized (mutex) {
-//                if (userSymbolTable.get(user) == null) {
-                this.users.add(new UserNode(user));
-                userSymbolTable.put(user, userLength);
+            this.users.add(new UserNode(user));
+            userSymbolTable.put(user, userLength);
 
-                return userLength++;
-//        }
-//    }
+            return userLength++;
         }
 
         return userSymbolTable.get(user);
@@ -135,7 +130,6 @@ public class UserGraph {
      * @return user states
      */
     public JsonNode getUserStates () {
-        // TODO fix this by evaluating the double map solution
         ObjectNode loggedValues = this.mapper.createObjectNode();
 
         for (UserNode userNode : users) {

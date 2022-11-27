@@ -1,9 +1,10 @@
-package fi.intern.supercell;
+package fi.intern.supercell.processors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import fi.intern.supercell.graph.UserGraph;
 
 import java.util.List;
 import java.util.Objects;
@@ -16,7 +17,6 @@ import java.util.Objects;
 public class UserGraphProcessor {
 
     private UserGraph userGraph = new UserGraph();
-    // TODO use CDI
     private final ObjectMapper mapper = new ObjectMapper();
     private final boolean surpassLog;
     private static final String UPDATE_TYPE = "update";

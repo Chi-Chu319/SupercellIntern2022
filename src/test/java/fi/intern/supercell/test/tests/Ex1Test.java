@@ -1,7 +1,7 @@
 package fi.intern.supercell.test.tests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fi.intern.supercell.UserGraphProcessor;
+import fi.intern.supercell.processors.UserGraphProcessor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

@@ -1,26 +1,17 @@
-package fi.intern.supercell;
+package fi.intern.supercell.processors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import fi.intern.supercell.graph.AbstractUserGraph;
+import fi.intern.supercell.graph.ConcurrentUserGraph;
+import fi.intern.supercell.graph.UserGraph;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
-import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
-import java.util.stream.Stream;
 
 /**
  * User graph processor track users states
@@ -30,7 +21,7 @@ import java.util.stream.Stream;
 public class UserGraphStateProcessor {
 
     private UserGraph userGraph = new UserGraph();
-    // TODO use CDI
+    private ConcurrentUserGraph concurrentUserGraph = new ConcurrentUserGraph();
     private final ObjectMapper mapper = new ObjectMapper();
     private boolean surpassLog = false;
     private int parallelism;
@@ -53,7 +44,7 @@ public class UserGraphStateProcessor {
      * @param action action
      * @throws IllegalArgumentException IllegalArgumentException
      */
-    private void processUpdateAction (JsonNode action) throws IllegalArgumentException {
+    private void processUpdateAction (JsonNode action, AbstractUserGraph appliedUserGraph) throws IllegalArgumentException {
         if (action.get("type") == null || !Objects.equals(action.get("type").textValue(), "update")) {
             throw new IllegalArgumentException("Invalid action type");
         }
@@ -62,7 +53,7 @@ public class UserGraphStateProcessor {
         int timestamp = action.get("timestamp").intValue();
         JsonNode values = action.get("values");
 
-        userGraph.updateUser(user, timestamp, values);
+        appliedUserGraph.updateUser(user, timestamp, values);
     }
 
     /**
@@ -91,13 +82,13 @@ public class UserGraphStateProcessor {
             lines.forEach(line -> {
                 try {
                     JsonNode action = mapper.readValue(line, ObjectNode.class);
-                    processUpdateAction(action);
+                    processUpdateAction(action, this.userGraph);
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
                 }
             });
 
-            String output = userGraph.getUserStates().toString();
+            String output = userGraph.getUserStates().toPrettyString();
             if (!surpassLog) {
                 System.out.print(output);
             }
@@ -114,6 +105,7 @@ public class UserGraphStateProcessor {
      */
     public void reset () {
         this.userGraph = new UserGraph();
+        this.concurrentUserGraph = new ConcurrentUserGraph();
     }
 
     /**
@@ -128,16 +120,16 @@ public class UserGraphStateProcessor {
                 lines.parallelStream().forEach(line -> {
                     try {
                         JsonNode action = mapper.readValue(line, ObjectNode.class);
-                        processUpdateAction(action);
+                        processUpdateAction(action, this.concurrentUserGraph);
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
                     }
                 })
             ).get();
 
-            String output = userGraph.getUserStates().toString();
+            String output = concurrentUserGraph.getUserStates().toPrettyString();
             if (!surpassLog) {
-                System.out.print(output);
+                System.out.println(output);
             }
 
             return output;

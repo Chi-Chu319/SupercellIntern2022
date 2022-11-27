@@ -1,7 +1,7 @@
 package fi.intern.supercell.test.tests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import fi.intern.supercell.UserGraphStateProcessor;
+import fi.intern.supercell.processors.UserGraphStateProcessor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,12 +39,7 @@ class Ex2Test {
             List<String> inputLines = Files.readAllLines(inputFile.toPath());
             List<String> outputLines = Files.readAllLines(outputFile.toPath());
 
-            long sequentialStart = System.currentTimeMillis();
             String processorOutput = userGraphStateProcessor.processSequential(inputLines);
-            long sequentialFinish = System.currentTimeMillis();
-
-            long sequentialTime = sequentialFinish - sequentialStart;
-            System.out.printf("Sequential time %d%n", sequentialTime);
 
             outputLines.forEach(s -> outputContentBuilder.append(s).append("\n"));
             String outputContent = outputContentBuilder.toString();
@@ -72,12 +67,7 @@ class Ex2Test {
             List<String> inputLines = Files.readAllLines(inputFile.toPath());
             List<String> outputLines = Files.readAllLines(outputFile.toPath());
 
-            long concurrentStart = System.currentTimeMillis();
             String processorOutput = userGraphStateProcessor.processConcurrent(inputLines);
-            long concurrentFinish = System.currentTimeMillis();
-
-            long sequentialTime = concurrentFinish - concurrentStart;
-            System.out.printf("Concurrent time %d%n", sequentialTime);
 
             outputLines.forEach(s -> outputContentBuilder.append(s).append("\n"));
             String outputContent = outputContentBuilder.toString();
@@ -95,7 +85,6 @@ class Ex2Test {
         testSequentialProcessor("input1.txt", "output1.txt");
     }
 
-//    TODO check for failure
     @Test
     @DisplayName("test input1 concurrent")
     void testInput1Concurrent() {

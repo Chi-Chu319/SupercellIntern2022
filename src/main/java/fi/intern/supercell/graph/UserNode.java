@@ -1,4 +1,4 @@
-package fi.intern.supercell;
+package fi.intern.supercell.graph;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -76,17 +76,15 @@ public class UserNode {
      * @param value value
      * @return true if updated, false if not updated
      */
-    public boolean updateValue (int timeStamp, String key, String value) {
-        synchronized (this) {
-            Pair<String, Integer> currentValue = values.get(key);
+    public synchronized boolean updateValue (int timeStamp, String key, String value) {
+        Pair<String, Integer> currentValue = values.get(key);
 
-            // if value not exists or value is outdated, updated
-            if (currentValue == null || currentValue.getRight() < timeStamp) {
-                values.put(key, Pair.of(value, timeStamp));
-                return true;
-            }
-
-            return false;
+        // if value not exists or value is outdated, updated
+        if (currentValue == null || currentValue.getRight() < timeStamp) {
+            values.put(key, Pair.of(value, timeStamp));
+            return true;
         }
+
+        return false;
     }
 }
