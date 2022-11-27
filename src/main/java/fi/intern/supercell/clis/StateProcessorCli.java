@@ -9,6 +9,9 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.List;
 
+/**
+ * Command line interface for problem 2 solver
+ */
 public class StateProcessorCli {
 
     private static final Option ARG_HELP = new Option("h", "help", false, "help");
