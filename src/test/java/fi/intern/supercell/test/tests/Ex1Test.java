@@ -70,4 +70,54 @@ class Ex1Test {
     void testInput3() {
         testProcessor("input3.txt", "output3.txt");
     }
+
+    /**
+     * Corner case test 1
+     * Makes friend and delete, then perform update
+     * Expect empty output
+     */
+    @Test
+    @DisplayName("corner test input1")
+    void testCornerInput1() {
+        testProcessor("cornerInput1.txt", "cornerOutput1.txt");
+    }
+
+    /**
+     * Corner case test 2
+     * Update when no friend
+     * Make friend
+     * Perform same update (same timestamp)
+     * Expect empty output
+     */
+    @Test
+    @DisplayName("corner test input2")
+    void testCornerInput2() {
+        testProcessor("cornerInput2.txt", "cornerOutput2.txt");
+    }
+
+    /**
+     * Corner case test 3
+     * Update when no friend
+     * Make friend
+     * Perform same update (larger timestamp)
+     * Expect update log
+     */
+    @Test
+    @DisplayName("corner test input3")
+    void testCornerInput3() {
+        testProcessor("cornerInput3.txt", "cornerOutput3.txt");
+    }
+
+    /**
+     * Corner case test 3
+     * Update when no friend
+     * Make friend
+     * Perform different update (same timestamp)
+     * Expect update log
+     */
+    @Test
+    @DisplayName("corner test input4")
+    void testCornerInput4() {
+        testProcessor("cornerInput4.txt", "cornerOutput4.txt");
+    }
 }
