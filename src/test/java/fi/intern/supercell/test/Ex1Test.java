@@ -1,4 +1,4 @@
-package fi.intern.supercell.test.tests;
+package fi.intern.supercell.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.intern.supercell.processors.UserGraphProcessor;
@@ -12,16 +12,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
-class Ex1Test {
+public class Ex1Test {
 
-    private final UserGraphProcessor userGraphProcessor = new UserGraphProcessor(true);
-    private final ObjectMapper mapper = new ObjectMapper();
-    private final String dirPrefix = "src/test/java/resources/ex1";
-
-    @BeforeEach
-    void setUp() {
-        this.userGraphProcessor.reset();
-    }
+    ObjectMapper mapper = new ObjectMapper();
+    String dirPrefix = "src/test/java/resources/ex1";
 
     /**
      * Tests the graph processor
@@ -30,6 +24,8 @@ class Ex1Test {
      * @param outputFilename output filename
      */
     void testProcessor(String inputFilename, String outputFilename) {
+        UserGraphProcessor userGraphProcessor = new UserGraphProcessor(true);
+
         try {
             File inputFile = new File(dirPrefix, inputFilename);
             File outputFile = new File(dirPrefix, outputFilename);
@@ -55,19 +51,19 @@ class Ex1Test {
 
     @Test
     @DisplayName("test input1")
-    void testInput1() {
+    public void testInput1() {
         testProcessor("input1.txt", "output1.txt");
     }
 
     @Test
     @DisplayName("test input2")
-    void testInput2() {
+    public void testInput2() {
         testProcessor("input2.txt", "output2.txt");
     }
 
     @Test
     @DisplayName("test input3")
-    void testInput3() {
+    public void testInput3() {
         testProcessor("input3.txt", "output3.txt");
     }
 
@@ -78,7 +74,7 @@ class Ex1Test {
      */
     @Test
     @DisplayName("corner test input1")
-    void testCornerInput1() {
+    public void testCornerInput1() {
         testProcessor("cornerInput1.txt", "cornerOutput1.txt");
     }
 
@@ -91,7 +87,7 @@ class Ex1Test {
      */
     @Test
     @DisplayName("corner test input2")
-    void testCornerInput2() {
+    public void testCornerInput2() {
         testProcessor("cornerInput2.txt", "cornerOutput2.txt");
     }
 
@@ -104,7 +100,7 @@ class Ex1Test {
      */
     @Test
     @DisplayName("corner test input3")
-    void testCornerInput3() {
+    public void testCornerInput3() {
         testProcessor("cornerInput3.txt", "cornerOutput3.txt");
     }
 
@@ -117,7 +113,7 @@ class Ex1Test {
      */
     @Test
     @DisplayName("corner test input4")
-    void testCornerInput4() {
+    public void testCornerInput4() {
         testProcessor("cornerInput4.txt", "cornerOutput4.txt");
     }
 }

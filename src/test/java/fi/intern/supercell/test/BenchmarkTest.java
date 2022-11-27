@@ -1,9 +1,9 @@
-package fi.intern.supercell.test.tests;
+package fi.intern.supercell.test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.intern.supercell.processors.UserGraphStateProcessor;
-import fi.intern.supercell.test.TestGenerator;
+import resources.CaseGenerator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ public class BenchmarkTest {
      * @param actionPerUser action per user
      * @param parallelism parallelism
      */
-    private void logTestStart (int userCount, int actionPerUser, int parallelism) {
+    void logTestStart (int userCount, int actionPerUser, int parallelism) {
         StringBuilder contentBuilder = new StringBuilder();
 
         contentBuilder.append(String.format("Benchmark test on %d users, %d update actions per user, parallelism: %d", userCount, actionPerUser, parallelism));
@@ -42,7 +42,7 @@ public class BenchmarkTest {
      * @param sequentialTime sequential runtime
      * @param concurrentTime concurrent runtime
      */
-    private void logTestSummary (int parallelism, long sequentialTime, long concurrentTime) {
+    void logTestSummary (int parallelism, long sequentialTime, long concurrentTime) {
         double factor = (sequentialTime * 1.0) / (concurrentTime * 1.0);
         StringBuilder contentBuilder = new StringBuilder();
 
@@ -65,10 +65,10 @@ public class BenchmarkTest {
      * @param actionPerUser action per user
      * @param parallelism parallelism
      */
-    private void individualTest (int userCount, int actionPerUser, int parallelism) {
+    void individualTest (int userCount, int actionPerUser, int parallelism) {
         try {
             logTestStart(userCount, actionPerUser, parallelism);
-            List<String> testLines = TestGenerator.generateStateUpdates(userCount, actionPerUser);
+            List<String> testLines = CaseGenerator.generateStateUpdates(userCount, actionPerUser);
 
             userGraphStateProcessor.reset();
             userGraphStateProcessor.setParallelism(parallelism);
@@ -91,12 +91,10 @@ public class BenchmarkTest {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-
     }
-
     @Test
     @DisplayName("benchmark test")
-    void benchmarkTest () {
+    public void testBenchmark () {
         for (int userCount : userCounts) {
             for (int actionPerUser : actionsPerUser) {
                 for (int parallelism : parallelisms) {

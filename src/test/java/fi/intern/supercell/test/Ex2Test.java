@@ -1,4 +1,4 @@
-package fi.intern.supercell.test.tests;
+package fi.intern.supercell.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fi.intern.supercell.processors.UserGraphStateProcessor;
@@ -12,16 +12,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
-class Ex2Test {
+public class Ex2Test {
 
-    UserGraphStateProcessor userGraphStateProcessor = new UserGraphStateProcessor(true);
     ObjectMapper mapper = new ObjectMapper();
     String dirPrefix = "src/test/java/resources/ex2";
 
-    @BeforeEach
-    void setUp() {
-        this.userGraphStateProcessor.reset();
-    }
 
     /**
      * Tests the graph sequential processor
@@ -31,6 +26,7 @@ class Ex2Test {
      */
     void testSequentialProcessor(String inputFilename, String outputFilename) {
         StringBuilder outputContentBuilder = new StringBuilder();
+        UserGraphStateProcessor userGraphStateProcessor = new UserGraphStateProcessor(true);
 
         try {
             File inputFile = new File(dirPrefix, inputFilename);
@@ -59,6 +55,7 @@ class Ex2Test {
      */
     void testConcurrentProcessor(String inputFilename, String outputFilename) {
         StringBuilder outputContentBuilder = new StringBuilder();
+        UserGraphStateProcessor userGraphStateProcessor = new UserGraphStateProcessor(true);
 
         try {
             File inputFile = new File(dirPrefix, inputFilename);
@@ -81,13 +78,13 @@ class Ex2Test {
 
     @Test
     @DisplayName("test input1 sequential")
-    void testInput1Sequential() {
+    public void testInput1Sequential() {
         testSequentialProcessor("input1.txt", "output1.txt");
     }
 
     @Test
     @DisplayName("test input1 concurrent")
-    void testInput1Concurrent() {
+    public void testInput1Concurrent() {
         testConcurrentProcessor("input1.txt", "output1.txt");
     }
 }

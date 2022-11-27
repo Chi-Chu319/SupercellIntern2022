@@ -1,4 +1,4 @@
-package fi.intern.supercell.test;
+package resources;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,7 +12,7 @@ import java.util.UUID;
 /**
  * Test case generator
  */
-public class TestGenerator {
+public class CaseGenerator {
     private static final int randomValueCount = 10;
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final Random random = new Random();

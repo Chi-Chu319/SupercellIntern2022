@@ -11,7 +11,7 @@ import java.util.List;
 
 public class StateProcessorCli {
 
-    private static final Option ARG_HELP = new Option("h", "help", true, "help");
+    private static final Option ARG_HELP = new Option("h", "help", false, "help");
     private static final Option ARG_INPUT = new Option("i", "input", true, "input");
     private static final Option ARG_CONCURRENT = new Option("c", "concurrent", false, "enable concurrent run");
     private static final UserGraphStateProcessor processor = new UserGraphStateProcessor();
