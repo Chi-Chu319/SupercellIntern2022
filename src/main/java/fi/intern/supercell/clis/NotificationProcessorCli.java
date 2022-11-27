@@ -35,7 +35,7 @@ public class NotificationProcessorCli {
         HelpFormatter formatter = new HelpFormatter();
         PrintWriter writer = new PrintWriter(System.out);
 
-        writer.println("User graph state processor cli manual");
+        writer.println("User graph notification processor cli manual");
         writer.println();
         formatter.printUsage(writer, 100, "java -jar UserGraphStateCli.jar -i inputFile");
         formatter.printUsage(writer, 100, "-i --input         provide input file");
