@@ -23,8 +23,6 @@ public class UserGraph extends AbstractUserGraph {
     public UserGraph() {
     }
 
-    volatile static int userIndex;
-
     /**
      * Gets user index, create user if not exists
      *

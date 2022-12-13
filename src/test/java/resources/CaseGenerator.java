@@ -97,7 +97,7 @@ public class CaseGenerator {
             String username = UUID.randomUUID().toString();
 
             for (int j = 0; j < userActionCount; j++) {
-                int updateIndex = i * userActionCount + j;
+                int updateIndex = i + j * userCount;
                 ObjectNode updateValues = mapper.createObjectNode();
 
                 // 0 to 3 update entries

@@ -95,9 +95,9 @@ public class BenchmarkTest {
     @Test
     @DisplayName("benchmark test")
     public void testBenchmark () {
-        for (int userCount : userCounts) {
-            for (int actionPerUser : actionsPerUser) {
-                for (int parallelism : parallelisms) {
+        for (int parallelism : parallelisms) {
+            for (int userCount : userCounts) {
+                for (int actionPerUser : actionsPerUser) {
                     this.individualTest(userCount, actionPerUser, parallelism);
                 }
             }

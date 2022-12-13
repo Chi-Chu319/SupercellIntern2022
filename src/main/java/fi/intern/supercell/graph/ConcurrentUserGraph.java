@@ -31,16 +31,16 @@ public class ConcurrentUserGraph extends AbstractUserGraph {
      * @param user username
      */
     private UserNode getUser (String user) {
-        synchronized (this) {
-            if (userMap.get(user) == null) {
-                UserNode userNode = new UserNode(user);
-                this.userMap.put(user, userNode);
+        UserNode foundUserNode = userMap.get(user);
 
-                return userNode;
-            }
+        if (foundUserNode == null) {
+            UserNode userNode = new UserNode(user);
+            this.userMap.put(user, userNode);
 
-            return userMap.get(user);
+            return userNode;
         }
+
+        return foundUserNode;
     }
 
     /**
@@ -102,8 +102,8 @@ public class ConcurrentUserGraph extends AbstractUserGraph {
     public JsonNode updateUser(String user, int timestamp, JsonNode updatedValues)  {
         Lock lock = stripedLock.get(user);
 
+        lock.lock();
         try {
-            lock.lock();
             ObjectNode loggedValues = this.mapper.createObjectNode();
 
             UserNode userNode = this.getUser(user);
@@ -134,7 +134,6 @@ public class ConcurrentUserGraph extends AbstractUserGraph {
      */
     public JsonNode getUserStates () {
         ObjectNode loggedValues = this.mapper.createObjectNode();
-
 
         for (UserNode userNode : userMap.values()) {
             Map<String, Pair<String, Integer>> userValues = userNode.getValues();
